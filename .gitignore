@@ -50,3 +50,25 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+###> phpunit/phpunit ###
+
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+
+/.idea/
+/.env.*.local
+/.env.local
+/.env.local.php
+/config/secrets/prod/prod.decrypt.private.php
+/var/
+/public/bundles/
+
+
+/config/jwt/*
