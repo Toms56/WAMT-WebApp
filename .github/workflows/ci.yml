@@ -61,6 +61,7 @@ jobs:
                     coverage: pcov                    # nécessaire pour produire la couverture
             -   run: composer install --no-interaction --prefer-dist
             -   run: bin/console doctrine:migrations:migrate --no-interaction   # valide les migrations
+            -   run: bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration   # n'échoue pas s'il n'y a aucune migration
             -   run: bin/console doctrine:schema:validate                       # entités ↔ schéma cohérents
             -   run: vendor/bin/phpunit --coverage-clover coverage.xml          # génère le rapport pour Sonar
 
