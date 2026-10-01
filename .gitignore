@@ -69,6 +69,7 @@
 /config/secrets/prod/prod.decrypt.private.php
 /var/
 /public/bundles/
+/coverage.xml
 
 
 /config/jwt/*

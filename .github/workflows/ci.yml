@@ -1,0 +1,80 @@
+name: CI
+
+on:
+    push:
+        branches: [ '**' ]
+    pull_request:
+        branches: [ develop, main ]
+
+jobs:
+    quality:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.3'
+                    extensions: mbstring, intl, pdo_mysql
+                    tools: composer:v2
+                    coverage: none
+
+            # Cache des dépendances Composer pour accélérer les builds
+            -   uses: actions/cache@v4
+                with:
+                    path: vendor
+                    key: composer-${{ hashFiles('composer.lock') }}
+
+            -   run: composer install --no-interaction --prefer-dist
+            -   run: composer validate --strict
+            -   run: composer audit                       # failles connues dans les dépendances
+            -   run: bin/console lint:yaml config
+            -   run: bin/console lint:twig templates
+            -   run: bin/console lint:container
+            # - run: vendor/bin/phpstan analyse         # à activer une fois PHPStan configuré
+            #Ligne : composer require --dev phpstan/phpstan phpstan/phpstan-symfony phpstan/phpstan-doctrine
+    sonarqube:
+        name: SonarQube
+        runs-on: windows-latest
+        steps:
+            -   uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+                with:
+                    fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+            -   name: Cache SonarQube packages
+                uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+                with:
+                    path: ~/.sonar/cache
+                    key: ${{ runner.os }}-sonar
+                    restore-keys: ${{ runner.os }}-sonar
+            -   name: SonarQube Scan
+                uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
+                env:
+                    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    tests:
+        runs-on: ubuntu-latest
+        needs: quality                                # ne démarre que si le job précédent passe
+        services:
+            mysql:
+                image: mariadb:10.11                  # adapter à la version de la VM BDD
+                env:
+                    MARIADB_ROOT_PASSWORD: root
+                    MARIADB_DATABASE: app_test
+                ports: [ '3306:3306' ]
+                options: >-
+                    --health-cmd="healthcheck.sh --connect --innodb_initialized"
+                    --health-interval=10s --health-retries=5
+        env:
+            APP_ENV: test
+            DATABASE_URL: "mysql://root:root@127.0.0.1:3306/app_test?serverVersion=10.11.0-MariaDB"
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.3'
+                    extensions: mbstring, intl, pdo_mysql
+                    coverage: none
+            -   run: composer install --no-interaction --prefer-dist
+            -   run: bin/console doctrine:migrations:migrate --no-interaction   # valide les migrations
+            -   run: bin/console doctrine:schema:validate                       # entités ↔ schéma cohérents
+            -   run: vendor/bin/phpunit
