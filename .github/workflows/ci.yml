@@ -49,7 +49,7 @@ jobs:
                     --health-interval=10s --health-retries=5
         env:
             APP_ENV: test
-            DATABASE_URL: "mysql://root:root@127.0.0.1:3306/app_test?serverVersion=10.11.0-MariaDB"
+            DATABASE_URL: "mysql://root:root@127.0.0.1:3306/app?serverVersion=10.11.0-MariaDB"
         steps:
             -   uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
                 with:
@@ -66,7 +66,7 @@ jobs:
 
             # Analyse Sonar : uniquement sur main et sur les PR (évite les analyses en double)
             -   name: Cache SonarQube packages
-                if: github.ref == 'refs/heads/main'
+                if: (github.event_name == 'pull_request' && github.base_ref == 'main') || github.ref == 'refs/heads/main'
                 uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
                 with:
                     path: ~/.sonar/cache
