@@ -60,7 +60,6 @@ jobs:
                     extensions: mbstring, intl, pdo_mysql
                     coverage: pcov                    # nécessaire pour produire la couverture
             -   run: composer install --no-interaction --prefer-dist
-            -   run: bin/console doctrine:migrations:migrate --no-interaction   # valide les migrations
             -   run: bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration   # n'échoue pas s'il n'y a aucune migration
             -   run: bin/console doctrine:schema:validate                       # entités ↔ schéma cohérents
             -   run: vendor/bin/phpunit --coverage-clover coverage.xml          # génère le rapport pour Sonar
@@ -74,7 +73,7 @@ jobs:
                     key: ${{ runner.os }}-sonar
                     restore-keys: ${{ runner.os }}-sonar
             -   name: SonarQube Scan
-                if: github.ref == 'refs/heads/main'
+                if: (github.event_name == 'pull_request' && github.base_ref == 'main') || github.ref == 'refs/heads/main'
                 uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
                 env:
                     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
