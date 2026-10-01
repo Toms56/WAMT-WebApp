@@ -31,6 +31,7 @@ jobs:
             -   run: bin/console lint:yaml config
             -   run: bin/console lint:twig templates
             -   run: bin/console lint:container
+            -   run: composer validate --strict --no-check-publish
             # - run: vendor/bin/phpstan analyse         # à activer une fois PHPStan configuré
             #Ligne : composer require --dev phpstan/phpstan phpstan/phpstan-symfony phpstan/phpstan-doctrine
     sonarqube:
