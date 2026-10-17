@@ -42,7 +42,7 @@ jobs:
                 image: mariadb:10.11                  # adapter à la version de la VM BDD
                 env:
                     MARIADB_ROOT_PASSWORD: root
-                    MARIADB_DATABASE: app_test
+                    MARIADB_DATABASE: app
                 ports: [ '3306:3306' ]
                 options: >-
                     --health-cmd="healthcheck.sh --connect --innodb_initialized"
