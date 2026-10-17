@@ -42,14 +42,14 @@ jobs:
                 image: mariadb:10.11                  # adapter à la version de la VM BDD
                 env:
                     MARIADB_ROOT_PASSWORD: root
-                    MARIADB_DATABASE: app
+                    MARIADB_DATABASE: app_test
                 ports: [ '3306:3306' ]
                 options: >-
                     --health-cmd="healthcheck.sh --connect --innodb_initialized"
                     --health-interval=10s --health-retries=5
         env:
             APP_ENV: test
-            DATABASE_URL: "mysql://root:root@127.0.0.1:3306/app?serverVersion=10.11.0-MariaDB"
+            DATABASE_URL: "mysql://root:root@127.0.0.1:3306/app_test?serverVersion=10.11.0-MariaDB"
         steps:
             -   uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
             -   uses: shivammathur/setup-php@v2
